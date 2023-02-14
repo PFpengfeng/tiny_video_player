@@ -16,4 +16,22 @@ make install
 
 ## tutorial01 解码并保存图像帧
 调用流程图如下图，具体函数作用可阅读代码注释。
-<img src="./pic/flowchart.jpg" alt="解码流程图" style="zoom:50%;" />
+<img src="./pic/flowchart.jpg" alt="解码流程图" style="zoom:30%;" />
+```shell
+cd tutorial01
+mkdir build
+cmake ..
+make
+./decode_frame
+```
+
+## tutorial02 基于 SDL2.0 视频播放器
+下载 [SDL2](https://github.com/libsdl-org/SDL/releases)，执行如下命令，编译和安装
+```shell
+cd SDL
+./configure --prefix=you_path/tiny_video_player/sdl2
+make
+make install
+```
+SDL 显示流程如下所示：
+<img src="./pic/SDL.jpeg" alt="SDL流程" style="zoom:80%;" />

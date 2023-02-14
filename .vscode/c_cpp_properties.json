@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/ffmpeg-4.1/build/include"
+                "${workspaceFolder}/ffmpeg-4.1/build/include",
+                "${workspaceFolder}/sdl2/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
