@@ -35,3 +35,12 @@ make install
 ```
 SDL 显示流程如下所示：
 <img src="./pic/SDL.jpeg" alt="SDL流程" style="zoom:80%;" />
+
+本次实验使用 SDL 显示 RGB，需要为解码出来的 RGB 添加透明度，转化为 ARGB。
+```shel
+mkdir build
+cd build
+cmake ..
+make
+./video_player
+```

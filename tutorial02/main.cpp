@@ -11,22 +11,31 @@ extern "C"
     #include "libavutil/pixfmt.h"
     #include "libswscale/swscale.h"
     #include "SDL2/SDL.h"
-    #include 
 }
 
 #include <stdio.h>
 
+void RGB2RGBA(uint8_t *image_in, uint8_t *image_out, int width, int height){
+    for(int i = 0; i < height; ++i ){
+        for(int j = 0; j < width; ++j){
+            image_out[(i * width + j)*4] = '0'; 
+            memcpy(image_out + (i * width + j) * 4 + 1, image_in + (i * width + j) * 3,3);
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
     char *file_path = "../../testmedia/Johnny.mp4";
-
     AVFormatContext *pFormatCtx;
     AVCodecContext *pCodecCtx;
     AVCodec *pCodec;
     AVFrame *pFrame, *pFrameRGB;
     AVPacket *packet;
     uint8_t *out_buffer;
+    uint8_t *rgb32_buffer;            // for display rgb frame
+
+    int pixel_w,pixel_h;
 
     static struct SwsContext *img_convert_ctx;
 
@@ -78,7 +87,6 @@ int main(int argc, char *argv[])
     ///查找解码器
     pCodecCtx = pFormatCtx->streams[videoStream]->codec;
     pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-
     if (pCodec == NULL) {
         printf("Codec not found.\n");
         return -1;
@@ -93,6 +101,9 @@ int main(int argc, char *argv[])
     pFrame = av_frame_alloc();
     pFrameRGB = av_frame_alloc();
 
+    pixel_w = pCodecCtx->width;
+    pixel_h = pCodecCtx->height;
+
     // sws_getContext 进行图形缩放
     img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
             pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
@@ -102,6 +113,7 @@ int main(int argc, char *argv[])
     numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, pCodecCtx->width,pCodecCtx->height);
 
     out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
+    rgb32_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t)/3 * 4);
     avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_RGB24,
             pCodecCtx->width, pCodecCtx->height);
 
@@ -124,7 +136,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     sdlRenderer = SDL_CreateRenderer(screen,-1,0);
-    sdlTexture = SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_IYUV,SDL_TEXTUREACCESS_STREAMING,
+    sdlTexture = SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB32,SDL_TEXTUREACCESS_STREAMING,
           pCodecCtx->width,pCodecCtx->height);
     sdlRect.x=0;
     sdlRect.y=0;
@@ -153,14 +165,14 @@ int main(int argc, char *argv[])
                         pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                         pFrameRGB->linesize);
 
-                // SDL display 
-                SDL_UpdateYUVTexture(sdlTexture, &sdlRect,
-                        pFrameYUV->data[0], pFrameYUV->linesize[0],
-                        pFrameYUV->data[1], pFrameYUV->linesize[1],
-				        pFrameYUV->data[2], pFrameYUV->linesize[2]);
-
-				
-				SDL_RenderClear( sdlRenderer );  
+                // // SDL display 
+                // SDL_UpdateYUVTexture(sdlTexture, &sdlRect,
+                //         pFrameYUV->data[0], pFrameYUV->linesize[0],
+                //         pFrameYUV->data[1], pFrameYUV->linesize[1],
+                //         pFrameYUV->data[2], pFrameYUV->linesize[2]);
+                RGB2RGBA(out_buffer,rgb32_buffer,pixel_w,pixel_h);
+                SDL_UpdateTexture(sdlTexture, NULL, rgb32_buffer,pixel_w*4);
+				SDL_RenderClear(sdlRenderer);  
 				SDL_RenderCopy( sdlRenderer, sdlTexture,  NULL, &sdlRect);  
 				SDL_RenderPresent( sdlRenderer );  
 				//SDL End-----------------------
