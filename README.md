@@ -44,3 +44,5 @@ cmake ..
 make
 ./video_player
 ```
+## tutorial03 视频帧播放延时调整
+在 tutorial02中，视频帧之间的间隔并非严格为设置值，即 40 ms，本节将调整
